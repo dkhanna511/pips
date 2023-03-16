@@ -21,8 +21,8 @@ random.seed(125)
 np.random.seed(125)
 
 def run_model(model, rgbs, N, sw):
-    rgbs = rgbs.cuda().float() # B, S, C, H, W
-
+    # rgbs = rgbs.cuda().float() # B, S, C, H, W
+    rgbs = rgbs.cpu().float() # B, S, C, H, W
     B, S, C, H, W = rgbs.shape
     rgbs_ = rgbs.reshape(B*S, C, H, W)
     H_, W_ = 360, 640
@@ -32,7 +32,7 @@ def run_model(model, rgbs, N, sw):
 
     # pick N points to track; we'll use a uniform grid
     N_ = np.sqrt(N).round().astype(np.int32)
-    grid_y, grid_x = utils.basic.meshgrid2d(B, N_, N_, stack=False, norm=False, device='cuda')
+    grid_y, grid_x = utils.basic.meshgrid2d(B, N_, N_, stack=False, norm=False, device='cpu')
     grid_y = 8 + grid_y.reshape(B, -1)/float(N_-1) * (H-16)
     grid_x = 8 + grid_x.reshape(B, -1)/float(N_-1) * (W-16)
     xy = torch.stack([grid_x, grid_y], dim=-1) # B, N_*N_, 2
@@ -91,9 +91,9 @@ def main():
     ## choose hyps
     B = 1
     S = 8
-    N = 16**2 # number of points to track
+    N = 32**2 # number of points to track
 
-    filenames = glob.glob('./demo_images/*.jpg')
+    filenames = glob.glob('/home/dheerajk/ATS_Work/datasets/demoATSDatasetImages/*.jpg')
     filenames = sorted(filenames)
     print('filenames', filenames)
     max_iters = len(filenames)//S # run each unique subsequence
@@ -113,7 +113,9 @@ def main():
 
     global_step = 0
 
-    model = Pips(stride=4).cuda()
+    # model = Pips(stride=4).cuda()
+    model = Pips(stride=4)
+    
     parameters = list(model.parameters())
     if init_dir:
         _ = saverloader.load(init_dir, model)

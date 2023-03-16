@@ -88,7 +88,7 @@ def unpack_seqdim(tensor, B):
     tensor = torch.reshape(tensor, [B,S]+otherdims)
     return tensor
 
-def meshgrid2d(B, Y, X, stack=False, norm=False, device='cuda'):
+def meshgrid2d(B, Y, X, stack=False, norm=False, device='cpu'):
     # returns a meshgrid sized B x Y x X
 
     grid_y = torch.linspace(0.0, Y-1, Y, device=torch.device(device))
@@ -111,7 +111,7 @@ def meshgrid2d(B, Y, X, stack=False, norm=False, device='cuda'):
     else:
         return grid_y, grid_x
 
-def gridcloud2d(B, Y, X, norm=False, device='cuda'):
+def gridcloud2d(B, Y, X, norm=False, device='cpu'):
     # we want to sample for each location in the grid
     grid_y, grid_x = meshgrid2d(B, Y, X, norm=norm, device=device)
     x = torch.reshape(grid_x, [B, -1])
